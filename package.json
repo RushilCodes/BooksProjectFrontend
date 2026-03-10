@@ -1,6 +1,6 @@
 {
-  "name": "my-qwik-empty-starter",
-  "description": "Blank project with routing included",
+  "name": "world-library-frontend",
+  "description": "WorldLibrary - Share and borrow books from the world",
   "engines": {
     "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
   },
@@ -13,6 +13,7 @@
     "build.preview": "vite build --ssr src/entry.preview.tsx",
     "build.server": "qwik check-client src dist && vite build -c adapters/cloudflare-pages/vite.config.ts",
     "build.types": "tsc --incremental --noEmit",
+    "build.apk": "npm run build && cd android && bubblewrap build",
     "deploy": "wrangler pages deploy ./dist",
     "dev": "vite --mode ssr",
     "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
