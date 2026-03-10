@@ -1,0 +1,6 @@
+name = "world-library-frontend"
+compatibility_date = "2024-07-18"
+pages_build_output_dir = "./dist"
+
+[vars]
+API_URL = "https://world-library-backend.rushibajracharya.workers.dev"

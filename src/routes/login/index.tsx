@@ -1,6 +1,6 @@
-import { component$, useSignal, $, useContext } from "@builder.io/qwik";
+import { component$, useSignal, $ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
-import { AuthContext, API_URL } from "~/context/auth";
+import { API_URL, OAUTH_CONFIG } from "~/context/auth";
 
 export default component$(() => {
   const authState = useSignal({
@@ -19,8 +19,18 @@ export default component$(() => {
   const showPhoneAuth = useSignal(false);
   const showPasswordForm = useSignal(true);
   const otpSent = useSignal(false);
+  const otpError = useSignal("");
 
   const handleEmailAuth = $(async () => {
+    if (!email.value || !password.value) {
+      error.value = "Please fill in all fields";
+      return;
+    }
+    if (!isLogin.value && !name.value) {
+      error.value = "Please enter your name";
+      return;
+    }
+
     authState.value.loading = true;
     error.value = "";
     
@@ -52,86 +62,158 @@ export default component$(() => {
   });
 
   const handleGoogleAuth = $(async () => {
-    // In production, use Google OAuth popup
-    // For demo, we'll use token-based auth
-    const clientId = "YOUR_GOOGLE_CLIENT_ID";
-    const redirectUri = `${window.location.origin}/auth/google/callback`;
+    const config = OAUTH_CONFIG.google;
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    authUrl.searchParams.set('client_id', config.clientId);
+    authUrl.searchParams.set('redirect_uri', config.redirectUri);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', config.scope);
+    authUrl.searchParams.set('state', crypto.randomUUID());
     
-    // Simulated Google auth - in production use proper OAuth flow
-    const mockGoogleToken = "google_mock_token_" + Date.now();
-    const mockEmail = "user@gmail.com";
-    const mockName = "Google User";
+    // Use popup for OAuth
+    const width = 500;
+    const height = 600;
+    const left = (window.innerWidth - width) / 2;
+    const top = (window.innerHeight - height) / 2;
     
-    try {
-      authState.value.loading = true;
-      const res = await fetch(`${API_URL}/auth/google`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          googleToken: mockGoogleToken,
-          email: mockEmail,
-          name: mockName
-        }),
-      });
-      
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Google auth failed");
-      
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      window.location.href = "/";
-    } catch (e: any) {
-      error.value = e.message;
-    } finally {
-      authState.value.loading = false;
-    }
+    const popup = window.open(
+      authUrl.toString(),
+      'Google Login',
+      `width=${width},height=${height},left=${left},top=${top}`
+    );
+    
+    // Listen for message from popup
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data.type === 'google_auth') {
+        const { code } = event.data;
+        try {
+          authState.value.loading = true;
+          const res = await fetch(`${API_URL}/auth/google`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code }),
+          });
+          
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Google auth failed");
+          
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          window.location.href = "/";
+        } catch (e: any) {
+          error.value = e.message;
+        } finally {
+          authState.value.loading = false;
+        }
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    
+    // Cleanup after popup closes
+    const checkClosed = setInterval(() => {
+      if (popup?.closed) {
+        clearInterval(checkClosed);
+        window.removeEventListener('message', handleMessage);
+      }
+    }, 500);
   });
 
   const handleMicrosoftAuth = $(async () => {
-    const mockMicrosoftToken = "microsoft_mock_token_" + Date.now();
-    const mockEmail = "user@outlook.com";
-    const mockName = "Microsoft User";
+    const config = OAUTH_CONFIG.microsoft;
+    const authUrl = new URL('https://login.microsoftonline.com/common/oauth2/v2.0/authorize');
+    authUrl.searchParams.set('client_id', config.clientId);
+    authUrl.searchParams.set('redirect_uri', config.redirectUri);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', config.scope);
+    authUrl.searchParams.set('state', crypto.randomUUID());
     
-    try {
-      authState.value.loading = true;
-      const res = await fetch(`${API_URL}/auth/microsoft`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          microsoftToken: mockMicrosoftToken,
-          email: mockEmail,
-          name: mockName
-        }),
-      });
-      
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Microsoft auth failed");
-      
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      window.location.href = "/";
-    } catch (e: any) {
-      error.value = e.message;
-    } finally {
-      authState.value.loading = false;
-    }
+    const width = 500;
+    const height = 600;
+    const left = (window.innerWidth - width) / 2;
+    const top = (window.innerHeight - height) / 2;
+    
+    const popup = window.open(
+      authUrl.toString(),
+      'Microsoft Login',
+      `width=${width},height=${height},left=${left},top=${top}`
+    );
+    
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data.type === 'microsoft_auth') {
+        const { code } = event.data;
+        try {
+          authState.value.loading = true;
+          const res = await fetch(`${API_URL}/auth/microsoft`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code }),
+          });
+          
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Microsoft auth failed");
+          
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          window.location.href = "/";
+        } catch (e: any) {
+          error.value = e.message;
+        } finally {
+          authState.value.loading = false;
+        }
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    
+    const checkClosed = setInterval(() => {
+      if (popup?.closed) {
+        clearInterval(checkClosed);
+        window.removeEventListener('message', handleMessage);
+      }
+    }, 500);
   });
 
   const handleSendOTP = $(async () => {
     if (!phone.value || phone.value.length < 10) {
-      error.value = "Please enter a valid phone number";
+      otpError.value = "Please enter a valid phone number";
       return;
     }
     
-    // In production, send OTP via SMS service
-    // For demo, we'll simulate OTP
-    otpSent.value = true;
-    error.value = "Demo OTP: 123456";
+    try {
+      authState.value.loading = true;
+      const res = await fetch(`${API_URL}/auth/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: phone.value }),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        otpError.value = data.error || "Failed to send OTP";
+        return;
+      }
+      
+      otpSent.value = true;
+      otpError.value = "";
+    } catch (e: any) {
+      otpError.value = e.message;
+    } finally {
+      authState.value.loading = false;
+    }
   });
 
   const handlePhoneAuth = $(async () => {
+    if (!otp.value || otp.value.length !== 6) {
+      otpError.value = "Please enter the 6-digit OTP";
+      return;
+    }
+    
     try {
       authState.value.loading = true;
+      otpError.value = "";
+      
       const res = await fetch(`${API_URL}/auth/phone`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -149,7 +231,7 @@ export default component$(() => {
       localStorage.setItem("user", JSON.stringify(data.user));
       window.location.href = "/";
     } catch (e: any) {
-      error.value = e.message;
+      otpError.value = e.message;
     } finally {
       authState.value.loading = false;
     }
@@ -227,6 +309,12 @@ export default component$(() => {
 
           {showPhoneAuth.value ? (
             <div class="space-y-4">
+              {otpError.value && (
+                <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                  {otpError.value}
+                </div>
+              )}
+              
               {!otpSent.value ? (
                 <>
                   <div>
@@ -241,29 +329,46 @@ export default component$(() => {
                   </div>
                   <button
                     onClick$={handleSendOTP}
-                    class="w-full py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700"
+                    disabled={authState.value.loading}
+                    class="w-full py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 disabled:bg-indigo-400"
                   >
-                    Send OTP
+                    {authState.value.loading ? "Sending..." : "Send OTP"}
                   </button>
                 </>
               ) : (
                 <>
+                  <div class="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+                    OTP sent! Enter the 6-digit code (Demo: 123456)
+                  </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Enter OTP</label>
                     <input
                       type="text"
                       value={otp.value}
                       onInput$={(e) => otp.value = (e.target as HTMLInputElement).value}
+                      maxLength={6}
                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="123456"
                     />
                   </div>
+                  {!isLogin.value && (
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                      <input
+                        type="text"
+                        value={name.value}
+                        onInput$={(e) => name.value = (e.target as HTMLInputElement).value}
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        placeholder="Your name"
+                      />
+                    </div>
+                  )}
                   <button
                     onClick$={handlePhoneAuth}
                     disabled={authState.value.loading}
                     class="w-full py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 disabled:bg-indigo-400"
                   >
-                    Verify & Login
+                    {authState.value.loading ? "Verifying..." : "Verify & Login"}
                   </button>
                 </>
               )}

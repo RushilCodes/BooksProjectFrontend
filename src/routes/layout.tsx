@@ -1,6 +1,5 @@
-import { component$, Slot, useSignal, useVisibleTask$ } from "@builder.io/qwik";
+import { component$, Slot, useSignal, useVisibleTask$, $ } from "@builder.io/qwik";
 import { Link, useLocation } from "@builder.io/qwik-city";
-import { API_URL } from "~/context/auth";
 
 interface User {
   id: string;
