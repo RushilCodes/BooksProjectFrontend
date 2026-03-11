@@ -1,6 +1,7 @@
 import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import { API_URL } from "~/context/auth";
+import { FileUpload } from "~/components/upload/file-upload";
 
 interface Book {
   id: string;
@@ -24,6 +25,7 @@ interface User {
   name: string;
   phone?: string;
   provider: string;
+  profile_picture?: string;
 }
 
 export default component$(() => {
@@ -86,6 +88,40 @@ export default component$(() => {
     <div class="max-w-6xl mx-auto">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">My Listings</h1>
       <p class="text-gray-600 mb-8">Manage your books available for lending</p>
+
+      {currentUser.value && selectedUserId.value === currentUser.value.id && (
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 class="text-lg font-semibold mb-4">Profile</h2>
+          <div class="flex items-center gap-6">
+            <div class="flex-shrink-0">
+              <FileUpload
+                fileType="profile"
+                value={currentUser.value.profile_picture}
+                onChange$={async (url) => {
+                  try {
+                    const res = await fetch(`${API_URL}/users/${currentUser.value!.id}`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ profilePicture: url }),
+                    });
+                    if (res.ok) {
+                      currentUser.value = { ...currentUser.value!, profile_picture: url };
+                      localStorage.setItem("user", JSON.stringify(currentUser.value));
+                    }
+                  } catch (e) {
+                    console.error("Failed to update profile:", e);
+                  }
+                }}
+              />
+            </div>
+            <div>
+              <p class="font-medium text-lg">{currentUser.value.name}</p>
+              <p class="text-gray-600">{currentUser.value.email}</p>
+              <p class="text-sm text-gray-500 capitalize">Signed in with {currentUser.value.provider}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div class="mb-6">
         <label class="block text-sm font-medium text-gray-700 mb-1">

@@ -18,6 +18,7 @@ interface User {
   name: string;
   phone?: string;
   provider: string;
+  profile_picture?: string;
 }
 
 export default component$(() => {

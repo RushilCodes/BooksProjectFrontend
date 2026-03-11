@@ -48,7 +48,14 @@ export default component$(() => {
       
       const data = await res.json();
       
-      if (!res.ok) throw new Error(data.error || "Auth failed");
+      if (!res.ok) {
+        if (data.error?.includes("already exists")) {
+          error.value = "Account exists. Click 'Already have an account? Sign in' below.";
+        } else {
+          error.value = data.error || "Auth failed";
+        }
+        return;
+      }
       
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -241,9 +248,14 @@ export default component$(() => {
     <div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
       <div class="max-w-md w-full">
         <div class="bg-white rounded-lg shadow-lg p-8">
-          <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">
+          <h1 class="text-3xl font-bold text-center text-gray-900 mb-2">
             {isLogin.value ? "Welcome Back" : "Create Account"}
           </h1>
+          <p class="text-center text-gray-500 text-sm mb-6">
+            {isLogin.value 
+              ? "Sign in to your account to borrow books" 
+              : "Sign up to start borrowing and lending books"}
+          </p>
 
           {error.value && (
             <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">

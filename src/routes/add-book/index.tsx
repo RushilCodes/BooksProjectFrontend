@@ -1,6 +1,7 @@
 import { component$, useSignal, useVisibleTask$, $ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import { API_URL } from "~/context/auth";
+import { FileUpload } from "~/components/upload/file-upload";
 
 interface User {
   id: string;
@@ -178,16 +179,12 @@ export default component$(() => {
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
-              Cover Image URL (optional)
+              Cover Image (optional)
             </label>
-            <input
-              type="url"
+            <FileUpload
+              fileType="image"
               value={coverImage.value}
-              onInput$={(e) =>
-                (coverImage.value = (e.target as HTMLInputElement).value)
-              }
-              placeholder="https://example.com/cover.jpg"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              onChange$={(url) => (coverImage.value = url)}
             />
           </div>
 
