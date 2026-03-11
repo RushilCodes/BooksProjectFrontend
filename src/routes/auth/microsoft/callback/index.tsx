@@ -19,7 +19,7 @@ export default component$(() => {
     }
 
     if (window.opener) {
-      window.opener.postMessage({ type: 'microsoft_auth', code }, window.location.origin);
+      window.opener.postMessage({ type: 'microsoft_auth', code }, window.opener.location.origin);
       message.value = 'Microsoft sign-in complete. Closing this window...';
       setTimeout(() => window.close(), 300);
       return;

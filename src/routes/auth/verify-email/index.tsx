@@ -1,16 +1,16 @@
 import { component$, useSignal, useVisibleTask$, $ } from "@builder.io/qwik";
-import type { DocumentHead } from "@builder.io/qwik-city";
+import { useLocation, type DocumentHead } from "@builder.io/qwik-city";
 import { API_URL } from "~/context/auth";
 
 export default component$(() => {
+  const loc = useLocation();
   const loading = useSignal(true);
   const error = useSignal("");
   const success = useSignal(false);
 
-  useVisibleTask$(async () => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const email = params.get("email");
+  useVisibleTask$(() => {
+    const code = loc.url.searchParams.get("code");
+    const email = loc.url.searchParams.get("email");
 
     if (!code || !email) {
       error.value = "Missing verification code or email";
@@ -18,29 +18,33 @@ export default component$(() => {
       return;
     }
 
-    try {
-      const res = await fetch(`${API_URL}/auth/verify-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, email }),
-      });
+    const verify = async () => {
+      try {
+        const res = await fetch(`${API_URL}/auth/verify-email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, email }),
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!res.ok) {
-        error.value = data.error || "Verification failed";
-      } else {
-        success.value = true;
+        if (!res.ok) {
+          error.value = data.error || "Verification failed";
+        } else {
+          success.value = true;
+        }
+      } catch (e: any) {
+        error.value = e.message;
+      } finally {
+        loading.value = false;
       }
-    } catch (e: any) {
-      error.value = e.message;
-    } finally {
-      loading.value = false;
-    }
+    };
+
+    verify();
   });
 
   const handleResend = $(async () => {
-    const email = new URLSearchParams(window.location.search).get("email");
+    const email = loc.url.searchParams.get("email");
     if (!email) {
       error.value = "Email not found in URL";
       return;
