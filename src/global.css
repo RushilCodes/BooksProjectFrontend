@@ -2,4 +2,79 @@
 
 @theme {
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Georgia', 'Cambria', 'Times New Roman', Times, serif;
+  
+  /* Library-themed colors */
+  --color-library-*: initial;
+  --color-library-900: #2c1810;
+  --color-library-800: #3d2317;
+  --color-library-700: #5c3a2e;
+  --color-library-600: #7a4f3d;
+  --color-library-500: #996347;
+  --color-library-400: #b58968;
+  --color-library-300: #d4b69c;
+  --color-library-200: #e8d5c4;
+  --color-library-100: #f5ebe0;
+  --color-library-50: #faf6f1;
+  
+  --color-accent-*: initial;
+  --color-accent-900: #7c2d12;
+  --color-accent-800: #9a3412;
+  --color-accent-700: #c2410c;
+  --color-accent-600: #ea580c;
+  --color-accent-500: #f97316;
+  --color-accent-400: #fb923c;
+  --color-accent-300: #fdba74;
+  --color-accent-200: #fed7aa;
+  --color-accent-100: #ffedd5;
+  --color-accent-50: #fff7ed;
+}
+
+body {
+  background: linear-gradient(135deg, #faf6f1 0%, #f5ebe0 100%);
+}
+
+/* Book card shadows */
+.book-card {
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+.book-card:hover {
+  box-shadow: 
+    0 14px 28px rgba(0, 0, 0, 0.15),
+    0 10px 10px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  transform: translateY(-4px);
+}
+
+/* Decorative book spine effect */
+.book-spine {
+  position: relative;
+}
+
+.book-spine::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: linear-gradient(180deg, #7a4f3d 0%, #5c3a2e 100%);
+  border-radius: 4px 0 0 4px;
+}
+
+/* Paper texture effect */
+.paper-texture {
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.03) 0px,
+      transparent 1px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 3px
+    );
 }

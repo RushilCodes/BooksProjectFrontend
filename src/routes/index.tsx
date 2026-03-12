@@ -111,15 +111,15 @@ export default component$(() => {
   if (loading.value) {
     return (
       <div class="flex justify-center items-center min-h-[400px]">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-600"></div>
       </div>
     );
   }
 
   if (error.value) {
     return (
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-        Error: {error.value}
+      <div class="bg-red-50 border-2 border-red-300 rounded-lg p-4 text-red-800 shadow-sm">
+        <strong>Error:</strong> {error.value}
       </div>
     );
   }
@@ -127,28 +127,30 @@ export default component$(() => {
   return (
     <div>
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Browse Available Books</h1>
-        <p class="mt-2 text-gray-600">
-          Find and borrow books from our community library
+        <h1 class="text-4xl font-serif font-bold text-library-900 mb-2">📖 Browse Available Books</h1>
+        <p class="text-lg text-library-700">
+          Discover and borrow books from our community library
         </p>
       </div>
 
       {!user.value && (
-        <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p class="text-yellow-800">
-            <a href="/login" class="underline font-medium">Login</a> to borrow books or <a href="/login" class="underline font-medium">create an account</a>
+        <div class="mb-6 p-4 bg-accent-50 border-2 border-accent-200 rounded-lg shadow-sm">
+          <p class="text-accent-900 font-medium">
+            🔑 <a href="/login" class="underline font-semibold hover:text-accent-700">Login</a> to borrow books or <a href="/login" class="underline font-semibold hover:text-accent-700">create an account</a>
           </p>
         </div>
       )}
 
       {listings.value.length === 0 ? (
-        <div class="text-center py-12 bg-white rounded-lg shadow">
-          <p class="text-gray-500 text-lg">No books available for lending yet.</p>
+        <div class="text-center py-16 bg-library-50 rounded-lg shadow-md border-2 border-library-200 paper-texture">
+          <div class="text-6xl mb-4">📚</div>
+          <p class="text-library-700 text-lg font-medium mb-2">No books available for lending yet.</p>
+          <p class="text-library-600 mb-4">Be part of our reading community</p>
           <a
             href="/add-book/"
-            class="inline-block mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
+            class="inline-block px-6 py-3 bg-accent-600 text-white font-semibold rounded-md hover:bg-accent-700 shadow-md hover:shadow-lg transition-all"
           >
-            Be the first to list a book →
+            List Your First Book →
           </a>
         </div>
       ) : (
@@ -156,73 +158,73 @@ export default component$(() => {
           {listings.value.map((listing) => (
             <div
               key={listing.id}
-              class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              class="book-card bg-library-50 rounded-lg overflow-hidden book-spine"
             >
-              <div class="h-48 bg-gray-200 flex items-center justify-center">
+              <div class="h-56 bg-gradient-to-br from-library-200 to-library-300 flex items-center justify-center relative overflow-hidden">
                 {listing.cover_image ? (
                   <img
                     src={listing.cover_image}
                     alt={listing.title}
                     class="w-full h-full object-cover"
                     width="200"
-                    height="192"
+                    height="224"
                   />
                 ) : (
-                  <span class="text-6xl text-gray-400">📚</span>
+                  <div class="flex flex-col items-center">
+                    <span class="text-7xl text-library-600 opacity-60">📖</span>
+                  </div>
                 )}
+                <div class="absolute top-2 right-2 bg-accent-600 text-white px-2 py-1 rounded-md text-xs font-semibold shadow-md">
+                  ${(listing.price_per_day / 100).toFixed(2)}/day
+                </div>
               </div>
-              <div class="p-4">
-                <h2 class="font-semibold text-lg text-gray-900 truncate">
+              <div class="p-5">
+                <h2 class="font-serif font-bold text-lg text-library-900 line-clamp-2 mb-1">
                   {listing.title}
                 </h2>
-                <p class="text-sm text-gray-600 mt-1">{listing.author}</p>
-                <div class="mt-3 flex items-center justify-between">
-                  <span class="text-indigo-600 font-bold">
-                    ${(listing.price_per_day / 100).toFixed(2)}/day
-                  </span>
-                  <button
-                    onClick$={() => (selectedListing.value = listing.id)}
-                    class="px-3 py-1 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors"
-                  >
-                    Borrow
-                  </button>
-                </div>
+                <p class="text-sm text-library-600 italic mb-3">by {listing.author}</p>
+                <button
+                  onClick$={() => (selectedListing.value = listing.id)}
+                  class="w-full py-2 bg-accent-600 text-white text-sm font-semibold rounded-md hover:bg-accent-700 transition-all shadow-sm hover:shadow-md"
+                >
+                  📖 Borrow Now
+                </button>
               </div>
 
               {selectedListing.value === listing.id && (
-                <div class="p-4 bg-gray-50 border-t">
-                  <p class="text-sm font-medium text-gray-700 mb-2">
-                    Borrow this book
+                <div class="p-4 bg-library-100 border-t-2 border-library-300">
+                  <p class="text-sm font-semibold text-library-900 mb-3">
+                    📅 Select Borrowing Period
                   </p>
-                  <div class="space-y-2">
+                  <div class="space-y-3">
                     <div>
-                      <label class="block text-xs text-gray-500">Start Date</label>
+                      <label class="block text-xs font-medium text-library-700 mb-1">Start Date</label>
                       <input
                         type="date"
                         bind:value={borrowDate}
-                        class="w-full mt-1 px-2 py-1 border rounded text-sm"
+                        class="w-full px-3 py-2 border-2 border-library-300 rounded-md text-sm focus:border-accent-500 focus:ring-2 focus:ring-accent-200 outline-none"
                       />
                     </div>
                     <div>
-                      <label class="block text-xs text-gray-500">Return Date</label>
+                      <label class="block text-xs font-medium text-library-700 mb-1">Return Date</label>
                       <input
                         type="date"
                         bind:value={returnDate}
-                        class="w-full mt-1 px-2 py-1 border rounded text-sm"
+                        class="w-full px-3 py-2 border-2 border-library-300 rounded-md text-sm focus:border-accent-500 focus:ring-2 focus:ring-accent-200 outline-none"
                       />
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 pt-2">
                       <button
                         onClick$={() => handleBorrow(listing.id)}
-                        class="flex-1 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                        class="flex-1 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 shadow-sm hover:shadow-md transition-all"
                       >
-                        Confirm
+                        ✓ Confirm
                       </button>
                       <button
                         onClick$={() => (selectedListing.value = null)}
-                        class="flex-1 px-3 py-1 bg-gray-400 text-white text-sm rounded hover:bg-gray-500"
+                        class="flex-1 px-4 py-2 bg-library-400 text-white text-sm font-semibold rounded-md hover:bg-library-500 shadow-sm transition-all"
                       >
-                        Cancel
+                        × Cancel
                       </button>
                     </div>
                   </div>

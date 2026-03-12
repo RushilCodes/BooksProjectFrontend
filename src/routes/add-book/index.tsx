@@ -100,20 +100,21 @@ export default component$(() => {
   if (loading.value) {
     return (
       <div class="flex justify-center items-center min-h-[400px]">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-600"></div>
       </div>
     );
   }
 
   if (!currentUser.value) {
     return (
-      <div class="text-center py-12">
-        <p class="text-gray-600 mb-4">Please login to add books</p>
+      <div class="text-center py-16 bg-library-50 rounded-lg shadow-md border-2 border-library-200">
+        <div class="text-6xl mb-4">🔒</div>
+        <p class="text-library-700 text-lg font-medium mb-6">Please login to add books</p>
         <a
           href="/login"
-          class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          class="inline-block px-6 py-3 bg-accent-600 text-white font-semibold rounded-md hover:bg-accent-700 shadow-md hover:shadow-lg transition-all"
         >
-          Login
+          Login Now
         </a>
       </div>
     );
@@ -121,65 +122,67 @@ export default component$(() => {
 
   return (
     <div class="max-w-2xl mx-auto">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Add a New Book</h1>
-      <p class="text-gray-600 mb-8">
-        List your book for others to borrow
-      </p>
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-serif font-bold text-library-900 mb-2">📚 Add a New Book</h1>
+        <p class="text-lg text-library-700">
+          Share your books with the community
+        </p>
+      </div>
 
       {success.value && (
-        <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
-          Book listed successfully! You can add another one.
+        <div class="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg text-green-800 shadow-sm">
+          <strong>✓ Success!</strong> Book listed successfully! You can add another one.
         </div>
       )}
 
-      <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="bg-library-50 rounded-lg shadow-lg p-8 border-2 border-library-200 paper-texture">
         <div class="space-y-6">
-          <div class="p-3 bg-gray-50 rounded-md">
-            <p class="text-sm text-gray-600">Adding as: <span class="font-medium">{currentUser.value.name}</span></p>
+          <div class="p-4 bg-library-100 rounded-lg border border-library-300 shadow-sm">
+            <p class="text-sm text-library-700">👤 Adding as: <span class="font-semibold text-library-900">{currentUser.value.name}</span></p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Book Title *
+            <label class="block text-sm font-semibold text-library-800 mb-2">
+              📖 Book Title *
             </label>
             <input
               type="text"
               value={title.value}
               onInput$={(e) => (title.value = (e.target as HTMLInputElement).value)}
               placeholder="Enter book title"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-4 py-3 border-2 border-library-300 rounded-md focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-200 bg-white"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Author *
+            <label class="block text-sm font-semibold text-library-800 mb-2">
+              ✍️ Author *
             </label>
             <input
               type="text"
               value={author.value}
               onInput$={(e) => (author.value = (e.target as HTMLInputElement).value)}
               placeholder="Enter author name"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-4 py-3 border-2 border-library-300 rounded-md focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-200 bg-white"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              ISBN (optional)
+            <label class="block text-sm font-semibold text-library-800 mb-2">
+              🔢 ISBN (optional)
             </label>
             <input
               type="text"
               value={isbn.value}
               onInput$={(e) => (isbn.value = (e.target as HTMLInputElement).value)}
               placeholder="Enter ISBN"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-4 py-3 border-2 border-library-300 rounded-md focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-200 bg-white"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Cover Image (optional)
+            <label class="block text-sm font-semibold text-library-800 mb-2">
+              🖼️ Cover Image (optional)
             </label>
             <FileUpload
               fileType="image"
@@ -189,8 +192,8 @@ export default component$(() => {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Price per Day (USD) *
+            <label class="block text-sm font-semibold text-library-800 mb-2">
+              💵 Price per Day (USD) *
             </label>
             <input
               type="number"
@@ -202,16 +205,16 @@ export default component$(() => {
                   (e.target as HTMLInputElement).value
                 ) || 0)
               }
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-4 py-3 border-2 border-library-300 rounded-md focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-200 bg-white"
             />
           </div>
 
           <button
             onClick$={handleSubmit}
             disabled={submitting.value}
-            class="w-full py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors disabled:bg-indigo-400 disabled:cursor-not-allowed"
+            class="w-full py-4 bg-accent-600 text-white font-bold text-lg rounded-md hover:bg-accent-700 transition-all shadow-md hover:shadow-lg disabled:bg-library-400 disabled:cursor-not-allowed disabled:shadow-none"
           >
-            {submitting.value ? "Listing Book..." : "List Book for Lending"}
+            {submitting.value ? "⏳ Listing Book..." : "✓ List Book for Lending"}
           </button>
         </div>
       </div>

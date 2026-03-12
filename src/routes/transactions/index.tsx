@@ -81,33 +81,33 @@ export default component$(() => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 border border-green-300";
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800 border border-yellow-300";
       case "completed":
-        return "bg-gray-100 text-gray-800";
+        return "bg-library-200 text-library-800 border border-library-400";
       case "cancelled":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800 border border-red-300";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-library-200 text-library-800 border border-library-400";
     }
   };
 
   return (
     <div class="max-w-6xl mx-auto">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Transactions</h1>
-      <p class="text-gray-600 mb-8">View your borrowing and lending history</p>
+      <h1 class="text-4xl font-serif font-bold text-library-900 mb-2">📋 Transactions</h1>
+      <p class="text-lg text-library-700 mb-8">View your borrowing and lending history</p>
 
       <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          View as User
+        <label class="block text-sm font-semibold text-library-800 mb-2">
+          👥 View as User
         </label>
         <select
           value={selectedUserId.value}
           onChange$={(e) =>
             (selectedUserId.value = (e.target as HTMLSelectElement).value)
           }
-          class="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="w-full sm:w-64 px-4 py-3 border-2 border-library-300 rounded-md focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-200 bg-white font-medium"
         >
           {allUsers.value.map((user) => (
               <option value={user.id}>
@@ -117,60 +117,64 @@ export default component$(() => {
         </select>
       </div>
 
-      <div class="mb-6 flex gap-4">
+      <div class="mb-6 flex gap-3 bg-library-100 p-2 rounded-lg border-2 border-library-200 inline-flex">
         <button
           onClick$={() => activeTab.value = "borrowing"}
-          class={`px-4 py-2 rounded-md font-medium ${
+          class={`px-6 py-3 rounded-md font-semibold transition-all shadow-sm ${
             activeTab.value === "borrowing"
-              ? "bg-indigo-600 text-white"
-              : "bg-gray-200 text-gray-700"
+              ? "bg-accent-600 text-white shadow-md"
+              : "bg-library-50 text-library-800 hover:bg-white"
           }`}
         >
-          Borrowing
+          📚 Borrowing
         </button>
         <button
           onClick$={() => activeTab.value = "lending"}
-          class={`px-4 py-2 rounded-md font-medium ${
+          class={`px-6 py-3 rounded-md font-semibold transition-all shadow-sm ${
             activeTab.value === "lending"
-              ? "bg-indigo-600 text-white"
-              : "bg-gray-200 text-gray-700"
+              ? "bg-accent-600 text-white shadow-md"
+              : "bg-library-50 text-library-800 hover:bg-white"
           }`}
         >
-          Lending
+          🤝 Lending
         </button>
       </div>
 
       <div class="space-y-4">
         {transactions.value.length === 0 ? (
-          <p class="text-gray-500 text-center py-8">No transactions yet.</p>
+          <div class="text-center py-16 bg-library-50 rounded-lg shadow-md border-2 border-library-200 paper-texture">
+            <div class="text-6xl mb-4">📜</div>
+            <p class="text-library-700 text-lg font-medium mb-2">No transactions yet.</p>
+            <p class="text-library-600">Start borrowing or lending books to see your transaction history</p>
+          </div>
         ) : (
           transactions.value.map((tx) => (
             <div
               key={tx.id}
-              class="bg-white rounded-lg shadow-md p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              class="book-spine bg-library-50 rounded-lg shadow-md p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-2 border-library-200 hover:shadow-lg transition-shadow"
             >
               <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 h-12 w-12 bg-gray-200 rounded flex items-center justify-center text-2xl">
+                <div class="flex-shrink-0 h-14 w-14 bg-gradient-to-br from-library-200 to-library-300 rounded-md flex items-center justify-center text-3xl shadow-sm">
                   📖
                 </div>
                 <div>
-                  <h2 class="font-semibold text-lg text-gray-900">
+                  <h2 class="font-serif font-bold text-lg text-library-900">
                     {tx.title}
                   </h2>
-                  <p class="text-sm text-gray-500 mt-1">
-                    {formatDate(tx.start_date)} - {formatDate(tx.end_date)}
+                  <p class="text-sm text-library-600 mt-1">
+                    📅 {formatDate(tx.start_date)} - {formatDate(tx.end_date)}
                   </p>
                   <div class="mt-2 flex items-center gap-3">
                     <span
-                      class={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                      class={`px-3 py-1.5 text-xs font-semibold rounded-full shadow-sm ${getStatusColor(
                         tx.status
                       )}`}
                     >
                       {tx.status}
                     </span>
-                    <span class="text-sm text-gray-600">
+                    <span class="text-sm text-library-700 font-medium">
                       Total:{" "}
-                      <span class="font-medium text-indigo-600">
+                      <span class="font-bold text-accent-700 text-base">
                         ${(tx.total_price / 100).toFixed(2)}
                       </span>
                     </span>
