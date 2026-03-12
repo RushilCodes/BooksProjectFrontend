@@ -68,6 +68,8 @@ export default component$(() => {
     { strategy: "document-ready" }
   );
 
+  const transactions = activeTab.value === "borrowing" ? borrowing : lending;
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
@@ -108,110 +110,77 @@ export default component$(() => {
           class="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           {allUsers.value.map((user) => (
-            <option key={user.id} value={user.id}>
-              {`${user.name}`}
-            </option>
+              <option value={user.id}>
+                {`${user.name} (${user.email || 'no email'})`}
+              </option>
           ))}
         </select>
       </div>
 
-      <div class="mb-6">
-        <div class="border-b border-gray-200">
-          <nav class="-mb-px flex space-x-8">
-            <button
-              onClick$={() => (activeTab.value = "borrowing")}
-              class={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab.value === "borrowing"
-                  ? "border-indigo-500 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Borrowing ({borrowing.value.length})
-            </button>
-            <button
-              onClick$={() => (activeTab.value = "lending")}
-              class={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab.value === "lending"
-                  ? "border-indigo-500 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Lending ({lending.value.length})
-            </button>
-          </nav>
-        </div>
+      <div class="mb-6 flex gap-4">
+        <button
+          onClick$={() => activeTab.value = "borrowing"}
+          class={`px-4 py-2 rounded-md font-medium ${
+            activeTab.value === "borrowing"
+              ? "bg-indigo-600 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          Borrowing
+        </button>
+        <button
+          onClick$={() => activeTab.value = "lending"}
+          class={`px-4 py-2 rounded-md font-medium ${
+            activeTab.value === "lending"
+              ? "bg-indigo-600 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          Lending
+        </button>
       </div>
 
-      {loading.value ? (
-        <div class="flex justify-center items-center min-h-[300px]">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-        </div>
-      ) : (
-        <div class="space-y-4">
-          {(activeTab.value === "borrowing"
-            ? borrowing.value
-            : lending.value
-          ).length === 0 ? (
-            <div class="text-center py-12 bg-white rounded-lg shadow">
-              <p class="text-gray-500 text-lg">
-                No {activeTab.value} transactions yet.
-              </p>
-              {activeTab.value === "borrowing" && (
-                <a
-                  href="/"
-                  class="inline-block mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
-                >
-                  Browse available books →
-                </a>
-              )}
-            </div>
-          ) : (
-            (activeTab.value === "borrowing"
-              ? borrowing.value
-              : lending.value
-            ).map((tx) => (
-              <div
-                key={tx.id}
-                class="bg-white rounded-lg shadow-md p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-              >
-                <div class="flex items-start gap-4">
-                  <div class="flex-shrink-0 h-12 w-12 bg-gray-200 rounded flex items-center justify-center text-2xl">
-                    📖
-                  </div>
-                  <div>
-                    <h3 class="font-semibold text-lg text-gray-900">
-                      {tx.title}
-                    </h3>
-                    <p class="text-sm text-gray-500 mt-1">
-                      {formatDate(tx.start_date)} - {formatDate(tx.end_date)}
-                    </p>
-                    <div class="mt-2 flex items-center gap-3">
-                      <span
-                        class={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                          tx.status
-                        )}`}
-                      >
-                        {tx.status}
-                      </span>
-                      <span class="text-sm text-gray-600">
-                        Total:{" "}
-                        <span class="font-medium text-indigo-600">
-                          ${(tx.total_price / 100).toFixed(2)}
-                        </span>
-                      </span>
-                    </div>
-                  </div>
+      <div class="space-y-4">
+        {transactions.value.length === 0 ? (
+          <p class="text-gray-500 text-center py-8">No transactions yet.</p>
+        ) : (
+          transactions.value.map((tx) => (
+            <div
+              key={tx.id}
+              class="bg-white rounded-lg shadow-md p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 h-12 w-12 bg-gray-200 rounded flex items-center justify-center text-2xl">
+                  📖
                 </div>
-                <div class="flex gap-2">
-                  <button class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                    View Details
-                  </button>
+                <div>
+                  <h2 class="font-semibold text-lg text-gray-900">
+                    {tx.title}
+                  </h2>
+                  <p class="text-sm text-gray-500 mt-1">
+                    {formatDate(tx.start_date)} - {formatDate(tx.end_date)}
+                  </p>
+                  <div class="mt-2 flex items-center gap-3">
+                    <span
+                      class={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                        tx.status
+                      )}`}
+                    >
+                      {tx.status}
+                    </span>
+                    <span class="text-sm text-gray-600">
+                      Total:{" "}
+                      <span class="font-medium text-indigo-600">
+                        ${(tx.total_price / 100).toFixed(2)}
+                      </span>
+                    </span>
+                  </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 });

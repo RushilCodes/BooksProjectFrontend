@@ -88,7 +88,7 @@ export default component$(() => {
               </svg>
             </div>
           </div>
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">Email Verified!</h2>
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">Email Verified!</h1>
           <p class="text-gray-600 mb-6">Your email has been successfully verified.</p>
           <a
             href="/"
@@ -111,7 +111,7 @@ export default component$(() => {
             </svg>
           </div>
         </div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Verification Failed</h2>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Verification Failed</h1>
         <p class="text-gray-600 mb-6">{error.value}</p>
         <button
           onClick$={handleResend}

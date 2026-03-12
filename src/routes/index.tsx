@@ -172,9 +172,9 @@ export default component$(() => {
                 )}
               </div>
               <div class="p-4">
-                <h3 class="font-semibold text-lg text-gray-900 truncate">
+                <h2 class="font-semibold text-lg text-gray-900 truncate">
                   {listing.title}
-                </h3>
+                </h2>
                 <p class="text-sm text-gray-600 mt-1">{listing.author}</p>
                 <div class="mt-3 flex items-center justify-between">
                   <span class="text-indigo-600 font-bold">

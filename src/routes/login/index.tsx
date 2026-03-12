@@ -1,6 +1,8 @@
 import { component$, useSignal, $ } from "@builder.io/qwik";
+import { Link } from "@builder.io/qwik-city";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import { API_URL, OAUTH_CONFIG } from "~/context/auth";
+import { FileUpload } from "~/components/upload/file-upload";
 
 export default component$(() => {
   const authState = useSignal({
@@ -13,6 +15,7 @@ export default component$(() => {
   const password = useSignal("");
   const name = useSignal("");
   const phone = useSignal("");
+  const profilePicture = useSignal("");
   const otp = useSignal("");
   const error = useSignal("");
   const isLogin = useSignal(true);
@@ -20,6 +23,8 @@ export default component$(() => {
   const showPasswordForm = useSignal(true);
   const otpSent = useSignal(false);
   const otpError = useSignal("");
+  const verificationCode = useSignal("");
+  const showVerification = useSignal(false);
 
   const handleEmailAuth = $(async () => {
     if (!email.value || !password.value) {
@@ -38,7 +43,13 @@ export default component$(() => {
       const endpoint = isLogin.value ? `${API_URL}/auth/login` : `${API_URL}/auth/register`;
       const body = isLogin.value 
         ? { email: email.value, password: password.value }
-        : { email: email.value, password: password.value, name: name.value, provider: 'email' };
+        : { 
+            email: email.value || null, 
+            password: password.value, 
+            name: name.value, 
+            provider: 'email',
+            profilePicture: profilePicture.value || null
+          };
       
       const res = await fetch(endpoint, {
         method: "POST",
@@ -54,6 +65,12 @@ export default component$(() => {
         } else {
           error.value = data.error || "Auth failed";
         }
+        return;
+      }
+      
+      if (data.verificationCode) {
+        verificationCode.value = data.verificationCode;
+        showVerification.value = true;
         return;
       }
       
@@ -227,7 +244,8 @@ export default component$(() => {
         body: JSON.stringify({ 
           phone: phone.value,
           otp: otp.value,
-          name: name.value || `User-${phone.value.slice(-4)}`
+          name: name.value || `User-${phone.value.slice(-4)}`,
+          profilePicture: profilePicture.value || null
         }),
       });
       
@@ -266,26 +284,39 @@ export default component$(() => {
           {showPasswordForm.value && (
             <div class="space-y-4">
               {!isLogin.value && (
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                  <input
-                    type="text"
-                    value={name.value}
-                    onInput$={(e) => name.value = (e.target as HTMLInputElement).value}
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Your name"
-                  />
-                </div>
+                <>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                    <input
+                      type="text"
+                      value={name.value}
+                      onInput$={(e) => name.value = (e.target as HTMLInputElement).value}
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="Your name"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Profile Picture (optional)</label>
+                    <FileUpload
+                      fileType="profile"
+                      value={profilePicture.value}
+                      onChange$={(url) => profilePicture.value = url}
+                    />
+                  </div>
+                </>
               )}
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Email {isLogin.value ? '' : '(optional)'}
+                </label>
                 <input
                   type="email"
                   value={email.value}
                   onInput$={(e) => email.value = (e.target as HTMLInputElement).value}
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="you@example.com"
+                  placeholder={isLogin.value ? "you@example.com" : "you@example.com (optional)"}
                 />
               </div>
               
@@ -307,6 +338,20 @@ export default component$(() => {
               >
                 {authState.value.loading ? "Please wait..." : isLogin.value ? "Sign In" : "Create Account"}
               </button>
+
+              {showVerification.value && (
+                <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p class="font-medium text-green-800 mb-2">Verification Code:</p>
+                  <p class="text-2xl font-bold text-center text-green-700 letter-spacing-2">{verificationCode.value}</p>
+                  <p class="text-sm text-green-600 mt-2">Enter this code on the verification page or check backend logs.</p>
+                  <button
+                    onClick$={() => window.location.href = `/auth/verify-email?code=${verificationCode.value}&email=${encodeURIComponent(email.value)}`}
+                    class="w-full mt-3 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700"
+                  >
+                    Go to Verify Page
+                  </button>
+                </div>
+              )}
               
               <div class="relative my-6">
                 <div class="absolute inset-0 flex items-center">
@@ -350,7 +395,7 @@ export default component$(() => {
               ) : (
                 <>
                   <div class="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-                    OTP sent! Enter the 6-digit code (Demo: 123456)
+                    OTP sent! Check your phone for the code.
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Enter OTP</label>
@@ -364,16 +409,26 @@ export default component$(() => {
                     />
                   </div>
                   {!isLogin.value && (
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                      <input
-                        type="text"
-                        value={name.value}
-                        onInput$={(e) => name.value = (e.target as HTMLInputElement).value}
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Your name"
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                        <input
+                          type="text"
+                          value={name.value}
+                          onInput$={(e) => name.value = (e.target as HTMLInputElement).value}
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          placeholder="Your name"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Profile Picture (optional)</label>
+                        <FileUpload
+                          fileType="profile"
+                          value={profilePicture.value}
+                          onChange$={(url) => profilePicture.value = url}
+                        />
+                      </div>
+                    </>
                   )}
                   <button
                     onClick$={handlePhoneAuth}
@@ -435,14 +490,22 @@ export default component$(() => {
           )}
 
           <div class="mt-6 text-center">
-            <button
-              onClick$={() => isLogin.value = !isLogin.value}
-              class="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
-            >
-              {isLogin.value 
-                ? "Don't have an account? Sign up" 
-                : "Already have an account? Sign in"}
-            </button>
+            {isLogin.value ? (
+              <Link
+                href="/register/"
+                class="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+              >
+                Don't have an account? Sign up
+              </Link>
+            ) : (
+              <Link
+                href="/login/"
+                class="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                onClick$={() => isLogin.value = true}
+              >
+                Already have an account? Sign in
+              </Link>
+            )}
           </div>
         </div>
       </div>
